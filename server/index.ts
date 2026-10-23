@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import "dotenv/config";
 import express from "express";
+import { renderPasswordGate } from "./render-auth";
 import { fileURLToPath } from "node:url";
 import { join, dirname } from "node:path";
 import { analyze, requestSchema } from "./analysis";
@@ -13,6 +14,9 @@ import {
 import { settingsRouter } from "./settings-api";
 import { ProviderError, providerErrorMessage } from "./provider";
 const app = express();
+app.set("trust proxy", 1);
+app.get("/__health", (_req, res) => res.sendStatus(200));
+app.use(renderPasswordGate);
 app.disable("x-powered-by");
 app.use(express.json({ limit: "512kb" }));
 app.use((_req, res, next) => {
@@ -24,13 +28,16 @@ app.use((_req, res, next) => {
 // Host allowlist prevents a DNS-rebound website from reading the local config token.
 app.use("/api", (req, res, next) => {
   const host = req.headers.host || "";
-  if (!/^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host)) {
+  const localHost = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host);
+  const renderHost = process.env.RENDER_EXTERNAL_HOSTNAME;
+  if (!localHost && (!renderHost || host !== renderHost)) {
     res.status(403).json({ error: "请使用本机地址访问。" });
     return;
   }
   const origin = req.headers.origin;
   const allowed = [
     `http://${host}`,
+    `https://${host}`,
     "http://127.0.0.1:5178",
     "http://localhost:5178",
   ];
