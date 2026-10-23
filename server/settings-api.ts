@@ -19,7 +19,11 @@ const token = randomBytes(32).toString("hex");
 let active = false;
 settingsRouter.use((req, res, next) => {
   const remote = req.socket.remoteAddress;
-  if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote || "")) {
+  if (process.env.RENDER === "true" && req.method !== "GET") {
+    res.status(403).json({ error: "云端模型由部署者通过环境变量管理。" });
+    return;
+  }
+  if (process.env.RENDER !== "true" && !["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(remote || "")) {
     res.status(403).json({ error: "模型配置只能在本机访问。" });
     return;
   }
