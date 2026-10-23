@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: private-crush-monitor
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /__health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: HOST
+        value: 0.0.0.0
+      - key: CRUSH_OPEN_BROWSER
+        value: '0'
+      - key: JEV_PROVIDER
+        value: opencode
+      - key: JEV_API_KEY
+        sync: false
+      - key: CRUSH_AUTH_USER
+        sync: false
+      - key: CRUSH_AUTH_PASSWORD
+        sync: false
