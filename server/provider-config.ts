@@ -22,7 +22,7 @@ export const PROVIDERS = {
   },
   opencode: {
     name: "OpenCode Jev（限时免费）",
-    endpoint: "https://opencode.ai/inference/v1/systemone",
+    endpoint: "https://opencode.ai/inference/systemone/v1/systemone",
     model: "jev-1.13-free",
     keyEnv: "OPENCODE_API_KEY",
     keyUrl: "https://opencode.ai/console/",
